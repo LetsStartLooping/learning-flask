@@ -1,16 +1,18 @@
+# 1. Import Flask
 from flask import Flask, render_template
 
-# Define Flask App
+# 2. Define Flask App
 app = Flask(__name__)
 
-# Secret Key
+# 3. Secret Key
 app.config['SECRET_KEY'] = 'my-secret-key'
 
-
+# 4. Entry Point of your Website
 @app.route('/')
-def index1():
+def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
+    # 5. Run the App
     app.run(debug=True)
 
