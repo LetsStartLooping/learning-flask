@@ -7,6 +7,18 @@ app = Flask(__name__)
 # 3. Secret Key
 app.config['SECRET_KEY'] = 'my-secret-key'
 
+# Class for Tasks app
+class Task:
+
+    def __init__(self, name, status):
+        self.name = name
+        self.status = status
+
+
+my_tasks = [Task("Start learning Flask!", True),
+         Task("Start learning Jinja", True),
+         Task("Learn Loops in Jinja", False)]
+
 # 4. Entry Point of your Website
 @app.route('/')
 def index():
@@ -15,8 +27,7 @@ def index():
 # 6. 2nd Page - Tasks
 @app.route('/tasks')
 def tasks():
-    my_task_1 = 'Make an App using Flask'
-    return render_template('tasks.html', task_1 = my_task_1)
+    return render_template('tasks.html', my_tasks = my_tasks)
 
 if __name__ == '__main__':
     # 5. Run the App
