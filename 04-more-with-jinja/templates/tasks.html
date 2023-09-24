@@ -17,10 +17,10 @@
 <body class="mt-2 text-center">
     <p class="fs-2 text-success">My Tasks</p>
     {% for task in my_tasks %}
-    {% if task.status == true %}
-    <p class="fs-6" style="color: lightgrey">{{ task.name }}</p>
-    {% else %}
-    <p class="fs-6">{{ task.name }}</p>
-    {% endif %}
+        {% if task.status == true %}
+            <p class="fs-6" style="color: lightgrey">{{ task.name }}</p>
+        {% else %}
+            <p class="fs-6">{{ task.name }}</p>
+        {% endif %}
     {% endfor %}
 </body>
