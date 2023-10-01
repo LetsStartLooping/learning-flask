@@ -1,6 +1,7 @@
 # 1. Import Flask
 from flask import Flask, render_template
 
+
 # 2. Define Flask App
 app = Flask(__name__)
 
@@ -25,7 +26,7 @@ def index():
     return render_template('index.html')
 
 # 6. 2nd Page - Tasks
-@app.route('/tasks')
+@app.route('/tasks', methods=['GET', 'POST'])
 def tasks():
     return render_template('tasks.html', my_tasks = my_tasks)
 
