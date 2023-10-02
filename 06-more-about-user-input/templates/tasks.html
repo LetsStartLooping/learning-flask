@@ -16,11 +16,11 @@
 
 <body class="mt-2 text-center">
     <p class="fs-2 text-success">My Tasks</p>
-    <form method="POST">
+    <form method="POST" class="mt-4 mb-3">
         {{ form.hidden_tag() }}
-        {{ form.name.label }}
-        {{ form.name }}
-        {{ form.add }}
+        {{ form.name.label(style="color:green") }}
+        {{ form.name(placeholder="Type new task here...") }}
+        {{ form.add(class="btn btn-outline-primary btn-sm") }}
     </form>
     {% for task in my_tasks %}
         {% if task.status == true %}

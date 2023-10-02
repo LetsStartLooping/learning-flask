@@ -3,6 +3,7 @@ from flask import Flask, render_template
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
+from wtforms.validators import InputRequired, Length
 
 # 2. Define Flask App
 app = Flask(__name__)
@@ -24,7 +25,7 @@ my_tasks = [Task("Start learning Flask!", True),
 
 # Define Flask From for New Task
 class NewTask(FlaskForm):
-    name = StringField(label="New Task")
+    name = StringField(label="New Task", validators=[InputRequired(), Length(min=5, max=20)])
     add = SubmitField(label="Add Task")
 
 # 4. Entry Point of your Website
