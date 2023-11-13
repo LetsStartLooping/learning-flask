@@ -1,6 +1,7 @@
-# 1. Import Flask
+# Import Flask
 from flask import Flask, render_template, request
 
+# Imports Releated to Flask WTForms
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, Length
@@ -9,24 +10,28 @@ from wtforms.validators import InputRequired, Length
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+# Import for UUID
 import uuid
 
 
-# 2. Define Flask App
+# Define Flask App
 app = Flask(__name__)
 
-# 3. Secret Key
+# Secret Key
 app.config['SECRET_KEY'] = 'my-secret-key-01'
 
 
-# configure the SQLite database, relative to the app instance folder
+# Configure the SQLite DB - Specify Path and DB Name
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mydb.db"
 
-
+# Define DB Instance for SQLAlchemy Operations
 db = SQLAlchemy(app)
+# Set-up Migrations
 Migrate(app, db)
 
 
+# This class which inherits `db.Model` helps us create Table in the DB
+# With this we can also do CRUD DB operations
 class Task(db.Model):
 
     # Specify Table Name
@@ -49,12 +54,12 @@ class NewTask(FlaskForm):
     add = SubmitField(label="Add Task")
     status = SubmitField(label="Status Change")
 
-# 4. Entry Point of your Website
+# Entry Point of your Website
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# 6. 2nd Page - Tasks
+# 2nd Page - Tasks
 @app.route('/tasks', methods=['GET', 'POST'])
 def tasks():
 
@@ -63,6 +68,7 @@ def tasks():
 
     # Form
     form = NewTask()
+
     # Form Step 1: Method call Validate Submig
     if form.validate_on_submit():
         # Form Step 2: Check whether `Add` button was clicked or not
@@ -72,6 +78,7 @@ def tasks():
 
             # Create a new Task Object
             new_task = Task(name=new_task_name, status=False)
+
             # Add that to the db.session
             db.session.add(new_task)
             # Post commit work to add entry to the table
@@ -84,6 +91,7 @@ def tasks():
             form.name.data = ""
 
     if request.method == 'POST':
+        # Updating Task Status
         changed_task_ids = request.form.getlist("t_status")
         for task in my_tasks:
             task.status = str(task.id) in changed_task_ids
@@ -97,6 +105,6 @@ def tasks():
 
 if __name__ == '__main__':
 
-    # 5. Run the App
+    # Run the App
     app.run(debug=True)
 
