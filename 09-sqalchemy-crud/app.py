@@ -16,10 +16,8 @@ import uuid
 app = Flask(__name__)
 
 # 3. Secret Key
-app.config['SECRET_KEY'] = 'my-secret-key'
+app.config['SECRET_KEY'] = 'my-secret-key-01'
 
-# create the app
-app = Flask(__name__)
 
 # configure the SQLite database, relative to the app instance folder
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mydb.db"
@@ -29,30 +27,21 @@ db = SQLAlchemy(app)
 Migrate(app, db)
 
 
-class MyTask(db.Model):
+class Task(db.Model):
 
     # Specify Table Name
     __tablename__ = 'tasks'
 
     # Specify Columns
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(36), primary_key=True, default=str(uuid.uuid4()), nullable=False)
     name = db.Column(db.String, nullable=False)
     status = db.Column(db.Boolean)
 
-
-
-# Class for Tasks app
-class Task:
-
     def __init__(self, name, status):
-        self.id = uuid.uuid4()
+        self.id = str(uuid.uuid4())
         self.name = name
         self.status = status
 
-
-my_tasks = [Task("Start learning Flask!", False),
-         Task("Start learning Jinja", False),
-         Task("Learn Loops in Jinja", False)]
 
 # Define Flask From for New Task
 class NewTask(FlaskForm):
@@ -68,6 +57,10 @@ def index():
 # 6. 2nd Page - Tasks
 @app.route('/tasks', methods=['GET', 'POST'])
 def tasks():
+
+    # Read Exising Tasks from DB
+    my_tasks = db.session.query(Task).all()
+
     # Form
     form = NewTask()
     # Form Step 1: Method call Validate Submig
@@ -76,8 +69,17 @@ def tasks():
         if form.add.data:
             # Form Step 3: Get the details of new Task
             new_task_name = form.name.data
-            # Form Step 4: Add new task to our Task list.
-            my_tasks.append(Task(name=new_task_name, status=False))
+
+            # Create a new Task Object
+            new_task = Task(name=new_task_name, status=False)
+            # Add that to the db.session
+            db.session.add(new_task)
+            # Post commit work to add entry to the table
+            db.session.commit()
+
+            # Read Exising Tasks from DB
+            my_tasks = db.session.query(Task).all()
+
             # Clear HTML Text Input field
             form.name.data = ""
 
@@ -85,6 +87,11 @@ def tasks():
         changed_task_ids = request.form.getlist("t_status")
         for task in my_tasks:
             task.status = str(task.id) in changed_task_ids
+
+        # Update Task Status to DB
+        db.session.commit()
+        
+
 
     return render_template('tasks.html', my_tasks = my_tasks, form=form)
 
