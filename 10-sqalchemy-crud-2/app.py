@@ -1,5 +1,5 @@
 # Import Flask
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 
 # Imports Releated to Flask WTForms
 from flask_wtf import FlaskForm
@@ -19,7 +19,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Secret Key
-app.config['SECRET_KEY'] = 'my-secret-key-01'
+app.config['SECRET_KEY'] = 'my-secret-key-flask'
 
 
 # Configure the SQLite DB - Specify Path and DB Name
@@ -60,7 +60,7 @@ class NewTask(FlaskForm):
 # User Form to Update Task
 class EditTask(FlaskForm):
     # To edit the name of your task
-    name = StringField(label="Task", validators=[InputRequired(), Length(min=5, max=40)])
+    name = StringField(label="Task Name", validators=[InputRequired(), Length(min=5, max=40)])
     # To change task status
     status = BooleanField(label="Status")
     # Add a due date to our Task
@@ -122,10 +122,49 @@ def tasks():
     return render_template('tasks.html', my_tasks = my_tasks, form=form)
 
 # 3rd Page: Update Task
-@app.route('/update_tasks', methods=['GET', 'POST'])
-def update_tasks():
+@app.route('/update_task', methods=['GET', 'POST'])
+def update_task():
 
+    # Create User Form for Edit Task
     form = EditTask()
+
+    # Get the Task ID (passed when user clicked on a task)
+    task_id = request.args.get("task_id")
+
+    # Get Task details
+    task = db.session.query(Task).filter(Task.id == task_id).first()
+
+   
+
+    if form.validate_on_submit():
+
+        # Handle Cancel
+        if form.cancel.data:
+            return redirect(url_for('tasks'))
+        
+        # Handle Delete
+        if form.delete.data:
+            db.session.delete(task)
+            db.session.commit()
+            return redirect(url_for('tasks'))
+
+        # Handle Update
+        if form.update.data:
+            task.name = form.name.data
+            task.due_date = form.due_date.data
+
+            db.session.commit()
+
+            return redirect(url_for('tasks'))
+        
+     # Load Form Data with task details
+    form.name.data = task.name
+    if task.due_date == None:
+        form.due_date.data = datetime(2099, 12, 31)
+    else:
+        form.due_date.data = task.due_date
+
+    return render_template('update_task.html', form = form, task = task)
 
 
 if __name__ == '__main__':
