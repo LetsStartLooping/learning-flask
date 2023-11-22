@@ -1,6 +1,9 @@
 # Import Flask
 from flask import Flask, render_template, request, redirect, url_for
 
+# For Flash Messages
+from flask import flash
+
 # Imports Releated to Flask WTForms
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, DateField
@@ -102,6 +105,9 @@ def tasks():
             # Post commit work to add entry to the table
             db.session.commit()
 
+            # Flash Successful message
+            flash(message="Task Added Successfully", category="success")
+
             # Read Exising Tasks from DB
             my_tasks = db.session.query(Task).all()
 
@@ -138,12 +144,14 @@ def update_task():
 
         # Handle Cancel
         if form.cancel.data:
+            flash(message="No Changes were made", category="info")
             return redirect(url_for('tasks'))
         
         # Handle Delete
         if form.delete.data:
             db.session.delete(task)
             db.session.commit()
+            flash(message="Task Deleted Successfully", category="warning")
             return redirect(url_for('tasks'))
 
         # Handle Update
@@ -153,7 +161,7 @@ def update_task():
             task.due_date = form.due_date.data
 
             db.session.commit()
-
+            flash(message="Task updated successfully!", category="success")
             return redirect(url_for('tasks'))
         
      # Load Form Data with task details
