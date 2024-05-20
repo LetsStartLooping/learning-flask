@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+        crossorigin="anonymous"></script>
+    <title>My Tasks</title>
+
+</head>
+
+<body class="mt-2 text-start mx-5">
+
+    {% for category, mess in get_flashed_messages(with_categories=true) %}
+    <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+        {{mess}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+
+
+    <div class="container-sm">
+        <p class="fs-2 text-primary">Tasks</p>
+        <form method="POST" class="mb-3">
+            <!-- Upper form for adding New Task -->
+            {{ form.hidden_tag() }}
+            <div class="row mb-4">
+                <div class="col-4">
+                    {{ form.name(class="form-control", placeholder="Type new task here...") }}
+                </div>
+                <div class="col">
+                    {{ form.add(class="btn btn-outline-primary") }}
+                </div>
+            </div>
+            <!-- List of Tasks - Status Update -->
+            {% for task in my_tasks %}
+            <div>
+                <input class="form-check-input" onclick=form.submit() value="{{task.id}}" type="checkbox"
+                    id="task_{{ task.id }}" name="t_status" {% if task.status==true %} checked {% endif %}>
+
+                <label
+                    class="mx-2 fs-6 {% if task.status==true %} text-secondary text-decoration-line-through {% endif %}"
+                    for="task_{{ task.id }}">
+                    <a href='{{ url_for("tasks.update_task", task_id=task.id) }}'
+                        style="text-decoration: none; color: inherit;">
+                        {{ task.name }}
+                    </a>
+                </label>
+            </div>
+            {% endfor %}
+        </form>
+
+    </div>
+</body>
