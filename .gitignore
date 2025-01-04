@@ -1,2 +1,5 @@
 my-venv
 migrations
+*.key
+*.pem
+*.env
