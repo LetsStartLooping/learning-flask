@@ -5,21 +5,8 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Link to Manifest File -->
-    <link rel="manifest" href="../static/manifest.json">
-
-    <!-- Enable WebApp iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <!-- Optional - Start-up Image -->
-    <link rel="apple-touch-startup-image" href="../static/splash.png">
-
-    <!-- WebApp tag for Android -->
-    <!-- Theme color - to match your app Theme -->
-    <meta name="theme-color" content="#000000">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
@@ -65,7 +52,7 @@
                 <label
                     class="mx-2 fs-6 {% if task.status==true %} text-secondary text-decoration-line-through {% endif %}"
                     for="task_{{ task.id }}">
-                    <a href='{{ url_for("tasks.update_task", task_id=task.id) }}'
+                    <a href='{{ url_for("update_task", task_id=task.id) }}'
                         style="text-decoration: none; color: inherit;">
                         {{ task.name }}
                     </a>
