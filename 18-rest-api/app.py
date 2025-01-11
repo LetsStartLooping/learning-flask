@@ -12,13 +12,15 @@ from wtforms.validators import InputRequired, Length
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-# Import for UUID
-import uuid
-
 from datetime import datetime
+
+# Imports for Flask-RESTful
+from flask_restful import Resource, Api
 
 # Define Flask App
 app = Flask(__name__)
+
+api = Api(app)
 
 # Secret Key
 app.config['SECRET_KEY'] = 'my-secret-key-flask'
@@ -41,13 +43,12 @@ class Task(db.Model):
     __tablename__ = 'tasks'
 
     # Specify Columns
-    id = db.Column(db.String(36), primary_key=True, default=str(uuid.uuid4()), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, nullable=False)
     status = db.Column(db.Boolean)
     due_date = db.Column(db.DateTime)
 
     def __init__(self, name, status, due_date=datetime(2099, 12, 31)):
-        self.id = str(uuid.uuid4())
         self.name = name
         self.status = status
         self.due_date = due_date
@@ -73,6 +74,101 @@ class EditTask(FlaskForm):
     delete = SubmitField(label="Delete Task")
     # Cancel and go back
     cancel = SubmitField(label="Cancel")
+    
+    
+###### Flask-RESTful ######
+# New Resource Class for Task
+class TaskResource(Resource):
+    
+    def get(self, task_id): 
+        ''' GET: Returns Task details by Task ID'''
+
+        task = db.session.query(Task).filter_by(id=task_id).first()
+        if task is None:
+            return {"message": f"Task not found for the task id {task_id}"}, 404
+        else:
+            return {
+                "task_id": task.id, 
+                "name": task.name, 
+                "status": task.status, 
+                "due_date": task.due_date.isoformat()
+                }, 200
+        
+    def post(self): 
+        ''' POST: Creates new Task with provided task details in the request body'''
+        
+        # Get Request Data
+        request_data = request.json
+        
+        # Task Name - Required Argument
+        if "name" not in request_data:
+            return {"message": "Missing 'Task Name' in the request body"}, 400
+        else:
+            task_name = request_data['name']            
+
+        # Due Date: Optional Arguments - use Default value
+        # Additional checks can get done here, like verifying date format, and if it is not correct then send back error message
+        due_date = request_data.get('due_date', datetime(9999, 12, 31))
+        
+        # Create new Task
+        task = Task(name = task_name, due_date=datetime.strptime(due_date, "%Y-%m-%d"), status=False)
+        db.session.add(task)
+        db.session.commit()
+        
+        # Return successful message, with new task ID and any addiditional data as needed
+        return {
+            "message": "New task created Successfully!",
+            "task_id": task.id
+        }, 201
+    
+    def put(self, task_id): 
+        ''' PUT: Update an existing Task'''
+        
+        task = db.session.query(Task).filter_by(id=task_id).first()
+        if task is None:
+            return {"message": f"Task not found for the task id {task_id}"}, 404
+        else:
+            # Update Exisiting Task
+            # Get Request Data
+            request_data = request.json
+            updates_found = False
+            if "name" in request_data:
+                # Update Task name
+                task.name = request_data['name']
+                updates_found = True
+            if "due_date" in request_data:
+                # Update Due Date
+                task.due_date = datetime.strptime(request_data['due_date'], "%Y-%m-%d")
+                updates_found = True
+            if "status" in request_data:
+                # Update Task name
+                task.status = request_data['status']
+                updates_found = True
+            # If Updates found in the request body, then update DB
+            if updates_found:
+                db.session.commit()
+                return {
+                    "message": f"Task with id {task_id} updated Successfully!"
+                }
+            else:
+                return {
+                    "message": f"No Updates were found in the Request Body for task with id {task_id}",
+                }, 400
+    
+    def delete(self, task_id): 
+        ''' DELETE: Delete Tasks using Task ID'''
+        task = db.session.query(Task).filter_by(id=task_id).first()
+        if task is None:
+            return {"message": f"Task not found for the task id {task_id}"}, 404
+        else:
+            db.session.delete(task)
+            db.session.commit()
+            return {
+                "message": f"Task with id {task_id} deleted Successfully!", 
+                }, 200
+        
+# Add resource to the API
+api.add_resource(TaskResource, "/task/<string:task_id>", "/task/")
 
 # Entry Point of your Website
 @app.route('/')
@@ -176,4 +272,4 @@ def update_task():
 if __name__ == '__main__':
 
     # Run the App
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
